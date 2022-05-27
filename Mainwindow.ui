@@ -39,6 +39,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="parentPrcWriteButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Write</string>
             </property>
@@ -50,8 +53,18 @@
       </item>
       <item>
        <widget class="QPushButton" name="forkButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Fork</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="createPipe">
+        <property name="text">
+         <string>Create Pipe</string>
         </property>
        </widget>
       </item>
@@ -92,6 +105,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="killProcessButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Kill</string>
             </property>
@@ -147,6 +163,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="closeButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Close</string>
             </property>
@@ -204,6 +223,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="readButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Read</string>
               </property>

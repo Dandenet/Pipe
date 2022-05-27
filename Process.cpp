@@ -43,6 +43,11 @@ const std::list<FileDescriptor *> &Process::GetDescriptorList() const
     return m_DescriptorList;
 }
 
+std::list<FileDescriptor *> &Process::GetDescriptorList()
+{
+    return m_DescriptorList;
+}
+
 size_t Process::GetSize() const
 {
     return m_DescriptorList.size();

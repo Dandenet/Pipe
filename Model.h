@@ -1,10 +1,14 @@
 #ifndef MODEL_H
 #define MODEL_H
-#include <stdint.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <variant>
 
+
+/**
+ * @brief Model roles
+ */
 enum Role {
     DumpRole,
     ProcessRole,
@@ -21,21 +25,68 @@ public:
     Model();
     ~Model();
 public:
+    /**
+     * @brief Attaches view to the model
+     * @param pView is the view
+     */
     void Attach(MainWindow* pView);
 
+    /**
+     * @brief Does fork parent process
+     */
     void ForkProcess();
+
+    /**
+     * @brief Creates anonimous pipe
+     */
     void CreatePipe();
-    void WriteMessage(const std::string& message);
-    void ReadMessage(size_t size);
+
+    /**
+     * @brief Kill selected process
+     */
     void KillProcess();
 
+    /**
+     * @brief Closes seclected file descriptor
+     */
+    void CloseDescriptor();
+    /**
+     * @brief Selects process from the process list
+     * @param index
+     */
     void SelectProcess(size_t index);
+
+    /**
+     * @brief Selects a file descriptor from descriptor list of the selected process
+     * @param index
+     */
     void SelectDescriptor(size_t index);
 
-    // Returns process or descriptor quantity
+    /**
+     * @brief Writes message to the chanel by the parent file descriptor
+     * @param message is the message that should to write
+     */
+    void WriteMessage(const std::string& message);
+
+    /**
+     * @brief Read message to the chanel by selected descriptor
+     * @param size is the bytes quantity that should read
+     */
+    void ReadMessage(size_t size);
+
+    /**
+     * @brief Returns quantity the elements with role
+     * @param role can be ProcessRole or DescriptorRole
+     * @return Returns quantity
+     */
     size_t GetSize(const Role& role) const;
 
-    // Returns dump, process or descriptor info, by index
+    /**
+     * @brief GetData
+     * @param index
+     * @param role
+     * @return Returns information of the model
+     */
     std::variant<size_t, std::string> GetData(size_t index, const Role& role);
 private:
     MainWindow*         m_pView;

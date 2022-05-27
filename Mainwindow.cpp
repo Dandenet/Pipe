@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include "Controller.h"
 
+//------------------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -10,21 +11,25 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 }
 
+//------------------------------------------------------------------------------------------
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+//------------------------------------------------------------------------------------------
 void MainWindow::Attach(Model* model)
 {
     m_Model = model;
 }
 
+//------------------------------------------------------------------------------------------
 void MainWindow::Attach(Controller* controller)
 {
     m_Controller = controller;
 }
 
+//------------------------------------------------------------------------------------------
 void MainWindow::ShowError(const std::string &error)
 {
     QMessageBox msg;
@@ -32,8 +37,6 @@ void MainWindow::ShowError(const std::string &error)
     msg.show();
     msg.exec();
 }
-
-#include <iostream>
 
 //------------------------------------------------------------------------------------------
 void MainWindow::UpdateProcess(size_t start, size_t end)
@@ -44,16 +47,14 @@ void MainWindow::UpdateProcess(size_t start, size_t end)
         auto text = QString("Proces ID: %1").arg(pid);
 
         if (ui->childProcessBox->count() <= index) {
-            try {
-                ui->childProcessBox->addItem(text);
-
-            } catch(std::exception& e) {
-                std::cout << e.what() << std::endl;
-            }
+            ui->childProcessBox->addItem(text);
         } else {
             ui->childProcessBox->setItemText(static_cast<int>(index), text);
         }
     }
+
+    if (ui->childProcessBox->count())
+        ui->killProcessButton->setEnabled(true);
 }
 
 //------------------------------------------------------------------------------------------
@@ -62,6 +63,9 @@ void MainWindow::DeleteProcess(size_t start, size_t end)
     for (size_t index = start; index < end; --end) {
         ui->childProcessBox->removeItem(static_cast<int>(index));
     }
+
+    if (!ui->childProcessBox->count())
+        ui->killProcessButton->setEnabled(false);
 }
 
 //------------------------------------------------------------------------------------------
@@ -78,6 +82,9 @@ void MainWindow::UpdateDescriptor(size_t start, size_t end)
             ui->fileDescriptorBox->setItemText(static_cast<int>(index), text);
         }
     }
+
+    if (ui->fileDescriptorBox->count())
+        ui->closeButton->setEnabled(true);
 }
 
 //------------------------------------------------------------------------------------------
@@ -86,6 +93,9 @@ void MainWindow::DeleteDescriptor(size_t start, size_t end)
     for (size_t index = start; index < end; --end) {
         ui->fileDescriptorBox->removeItem(static_cast<int>(index));
     }
+
+    if (!ui->fileDescriptorBox->count())
+        ui->closeButton->setEnabled(false);
 }
 
 //------------------------------------------------------------------------------------------
@@ -149,5 +159,21 @@ void MainWindow::on_readButton_clicked()
     if (size > 0) {
         m_Controller->ReadMessage(size);
     }
+}
+
+//------------------------------------------------------------------------------------------
+void MainWindow::on_createPipe_clicked()
+{
+    ui->forkButton->setEnabled(true);
+    ui->readButton->setEnabled(true);
+    ui->parentPrcWriteButton->setEnabled(true);
+    ui->createPipe->setEnabled(false);
+    m_Controller->CreatePipe();
+}
+
+
+void MainWindow::on_closeButton_clicked()
+{
+    m_Controller->CloseDescriptor();
 }
 

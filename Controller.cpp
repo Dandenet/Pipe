@@ -13,12 +13,7 @@ Controller::Controller(MainWindow *pView, Model *pModel) :
 
     if (m_pModel) {
         m_pModel->Attach(m_pView);
-
-        m_pModel->CreatePipe();
-//        m_pModel->ForkProcess();
     }
-
-
 }
 
 void Controller::Attach(MainWindow *pView) {
@@ -56,6 +51,16 @@ void Controller::ForkProcess()
 void Controller::KillProcess()
 {
     m_pModel->KillProcess();
+}
+
+void Controller::CreatePipe()
+{
+    m_pModel->CreatePipe();
+}
+
+void Controller::CloseDescriptor()
+{
+    m_pModel->CloseDescriptor();
 }
 
 void Controller::SelectProcess(size_t index)

@@ -39,6 +39,7 @@ void Model::CreatePipe()
     m_pParentProcess->Add(descriptor.second);
 
     m_ParentWriteDescriptor = descriptor.second;
+    m_pView->UpdateBuffer();
 }
 
 //------------------------------------------------------------------------------------------
@@ -48,7 +49,7 @@ void Model::ForkProcess()
     m_ProcessList.push_back(pChildProcess);
 
     size_t index = m_ProcessList.size();
-    m_pView->UpdateProcess(index - 1, index);
+    m_pView->UpdateProcess(0, index);
 }
 
 //------------------------------------------------------------------------------------------
@@ -67,6 +68,8 @@ void Model::WriteMessage(const std::string &message)
 void Model::ReadMessage(size_t size)
 {
     try {
+        if (!m_SelectedDescriptor)
+            throw std::exception("Descriptor doesn't selected");
 
         std::string buffer(1024, '\0');
         m_SelectedDescriptor->Read((uint8_t*)&buffer[0], size);
@@ -89,26 +92,54 @@ void Model::KillProcess()
         m_pView->DeleteDescriptor(0, size);
     }
 
-
-   /* ------- Should fix the bug ----------------- */
-
     // Find index to update
     size_t index = 0;
-    for (auto it = m_ProcessList.begin();
-                 it != m_ProcessList.end()  &&
-                *it != m_SelectedProcess; ++it, ++index);
-    m_pView->DeleteProcess(index, index + 1);
-    /*-----------------------------------------------*/
-
+    auto it = m_ProcessList.begin();
+    while (it != m_ProcessList.end()  && *it != m_SelectedProcess) {
+        ++index;
+        ++it;
+    };
 
     // Delete process from list
     m_ProcessList.remove(m_SelectedProcess);
+    delete m_SelectedProcess;
     m_SelectedProcess = nullptr;
+    m_SelectedDescriptor = nullptr;
+
+    m_pView->DeleteProcess(index, index + 1);
+}
+
+//------------------------------------------------------------------------------------------
+void Model::CloseDescriptor()
+{
+    if (!m_SelectedDescriptor)
+        return;
+
+    auto& list = m_SelectedProcess->GetDescriptorList();
+    size_t index = 0;
+
+    // find index of the descriptor should to delete
+    auto it = list.begin();
+    for (; it != list.end() && *it != m_SelectedDescriptor; ++it) {
+        ++index;
+    }
+
+    assert((it != list.end()));
+
+    m_SelectedDescriptor->Close();
+    list.remove(m_SelectedDescriptor);
+    delete m_SelectedDescriptor;
+    m_SelectedDescriptor = nullptr;
+
+    m_pView->DeleteDescriptor(index, index + 1);
 }
 
 //------------------------------------------------------------------------------------------
 void Model::SelectProcess(size_t index)
 {
+    if (index > m_ProcessList.size())
+        return;
+
     // Clear descriptor list for selected process
     if (m_SelectedProcess) {
         size_t size = m_SelectedProcess->GetDescriptorList().size();
@@ -118,38 +149,20 @@ void Model::SelectProcess(size_t index)
     // Select process
     m_SelectedProcess = *std::next(m_ProcessList.begin(), index);
 
+
     // Update descriptors for selected process
-    size_t desQuantity = m_SelectedProcess->GetSize();
-    m_pView->UpdateDescriptor(0, desQuantity);
+    size_t quantity = m_SelectedProcess->GetSize();
+    m_pView->UpdateDescriptor(0, quantity);
 }
 
 //------------------------------------------------------------------------------------------
 void Model::SelectDescriptor(size_t index)
 {
-    if (m_SelectedProcess) {
+    if (m_SelectedProcess && m_SelectedProcess->GetSize() > index) {
         auto it = m_SelectedProcess->GetDescriptorList().begin();
         m_SelectedDescriptor = *std::next(it, index);
     }
 }
-
-
-//void Model::Update()
-//{
-//    auto buffer = m_pWriteFD->GetBuffer();
-
-//    std::stringstream ss;
-
-//    auto* bufferWalker = buffer->GetData();
-//    for (size_t i = 0; i < buffer->BufferSize(); ++i) {
-//        ss << std::hex << static_cast<short>(*bufferWalker);
-//        ++bufferWalker;
-
-//        if (i % 2)
-//            ss << " ";
-//    }
-
-    //    m_pView->ShowBufferText(ss.str());
-//}
 
 //------------------------------------------------------------------------------------------
 size_t Model::GetSize(const Role& role) const
@@ -196,7 +209,6 @@ std::variant<size_t, std::string> Model::GetData(size_t index, const Role& role)
 
         // Returns dump buffer
         return std::string(ss.str());
-
     }
 
     // undefined role

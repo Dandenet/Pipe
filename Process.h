@@ -14,6 +14,7 @@ public:
     Process *Fork();
     void Add(FileDescriptor* descriptor);
     const std::list<FileDescriptor *>& GetDescriptorList() const;
+    std::list<FileDescriptor *>& GetDescriptorList();
 
     // Get descriptors quantity
     size_t GetSize() const;

@@ -18,6 +18,8 @@ public:
 
     void ForkProcess();
     void KillProcess();
+    void CreatePipe();
+    void CloseDescriptor();
     void SelectProcess(size_t index);
     void SelectDescriptor(size_t index);
 private:
